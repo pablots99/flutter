@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:peliculas/src/models/peliculas_model.dart';
 import 'package:peliculas/src/providers/peliculas_provider.dart';
+import 'package:peliculas/src/search/search_delegate.dart';
 import 'package:peliculas/src/widgets/card_swipper.dart';
 import 'package:peliculas/src/widgets/movie_horizontal.dart';
 
@@ -19,7 +20,13 @@ class HomePage extends StatelessWidget {
         title: Text('peliculas en cines'),
         backgroundColor: Colors.indigoAccent,
         actions: <Widget>[
-          IconButton(icon: Icon(Icons.search), onPressed: () {}),
+          IconButton(icon: Icon(Icons.search), onPressed: () {
+            showSearch(
+              context: context,
+              delegate: DataSearch(),
+              );
+
+          }),
         ],
       ),
       body: Container(

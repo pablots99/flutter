@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-
+import 'package:peliculas/src/models/acotres_mode.dart';
 import 'package:peliculas/src/models/peliculas_model.dart';
 import 'package:http/http.dart' as http;
 
@@ -13,14 +13,15 @@ class PeliculasProvider {
   int _popularesPge = 0;
 
   List<Pelicula> _populares = new List();
-  
+
   final _popuareStreamController = StreamController<List<Pelicula>>.broadcast();
 
-  Function(List<Pelicula>)get popularesSink => _popuareStreamController.sink.add;
+  Function(List<Pelicula>) get popularesSink =>
+      _popuareStreamController.sink.add;
 
-  Stream<List<Pelicula>>get popularesStream => _popuareStreamController.stream;
+  Stream<List<Pelicula>> get popularesStream => _popuareStreamController.stream;
 
-  void dispose(){
+  void dispose() {
     _popuareStreamController.close();
   }
 
@@ -41,21 +42,37 @@ class PeliculasProvider {
   }
 
   Future<List<Pelicula>> getPopulares() async {
-
-    if(cargando) return[];
+    if (cargando) return [];
     cargando = true;
 
     _popularesPge++;
-    final url = Uri.https(
-        _url, '3/movie/popular', {
-          'api_key': _apikey, 
-          'laguge': _language,
-          'page' :_popularesPge.toString(),
-          });
+    final url = Uri.https(_url, '3/movie/popular', {
+      'api_key': _apikey,
+      'laguge': _language,
+      'page': _popularesPge.toString(),
+    });
 
-    final respuesta= await _resp(url);
+    final respuesta = await _resp(url);
     _populares.addAll(respuesta);
     popularesSink(_populares);
+    cargando = false;
     return respuesta;
+  }
+
+  Future<List<Actor>> getCast(String peliId) async {
+    final url = Uri.https(_url, '3/movie/$peliId/credits', {
+      'api_key': _apikey,
+      'laguge': _language,
+    });
+    final resp= await http.get(url);
+    final decodedata = json.decode(resp.body);
+    final cast = new Cast.fromJsonList(decodedata['cast']);
+    return cast.actores;
+  }
+
+  Future<List<Pelicula>> buscarPelicula(String query) async {
+    final url = Uri.https(
+        _url, '3/search/movie', {'api_key': _apikey, 'laguge': _language, 'query':query});
+    return _resp(url);
   }
 }
